@@ -1,10 +1,11 @@
-# MediaStore
+# Entertainment Platform
 
 A full-stack digital media storefront for browsing movies, purchasing titles with Stripe, and managing an admin catalog.
 
 ## Tech stack
 
 **Frontend**
+
 - React 19
 - Vite
 - TypeScript
@@ -13,6 +14,7 @@ A full-stack digital media storefront for browsing movies, purchasing titles wit
 - Stripe.js
 
 **Backend**
+
 - Node.js
 - Express
 - TypeScript
@@ -61,14 +63,14 @@ cp backend/.env.example backend/.env
 
 Fill in:
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `STRIPE_SECRET_KEY` | Stripe secret key |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
-| `JWT_SECRET` | Secret used to sign auth tokens |
-| `FRONTEND_URL` | Frontend origin for CORS (e.g. `http://localhost:5173`) |
-| `PORT` | API port (default: `3000`) |
+| Variable                | Description                                             |
+| ----------------------- | ------------------------------------------------------- |
+| `DATABASE_URL`          | PostgreSQL connection string                            |
+| `STRIPE_SECRET_KEY`     | Stripe secret key                                       |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret                           |
+| `JWT_SECRET`            | Secret used to sign auth tokens                         |
+| `FRONTEND_URL`          | Frontend origin for CORS (e.g. `http://localhost:5173`) |
+| `PORT`                  | API port (default: `3000`)                              |
 
 ### Frontend
 
@@ -80,10 +82,10 @@ cp frontend/.env.example frontend/.env
 
 Fill in:
 
-| Variable | Description |
-|---|---|
-| `VITE_API_URL` | Backend API URL (e.g. `http://localhost:3000`) |
-| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key |
+| Variable                      | Description                                    |
+| ----------------------------- | ---------------------------------------------- |
+| `VITE_API_URL`                | Backend API URL (e.g. `http://localhost:3000`) |
+| `VITE_STRIPE_PUBLISHABLE_KEY` | Stripe publishable key                         |
 
 Never commit real `.env` files. Only `.env.example` belongs in git.
 
@@ -100,14 +102,14 @@ The API runs on `http://localhost:3000` by default.
 
 ### Useful backend scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start API in watch mode |
-| `npm run build` | Compile TypeScript |
-| `npm run db:migrate` | Apply Drizzle migrations |
-| `npm run db:generate` | Generate a new migration from schema changes |
-| `npm run db:seed` | Seed movies data |
-| `npm run db:link-products` | Create Stripe products and link movies |
+| Command                    | Description                                  |
+| -------------------------- | -------------------------------------------- |
+| `npm run dev`              | Start API in watch mode                      |
+| `npm run build`            | Compile TypeScript                           |
+| `npm run db:migrate`       | Apply Drizzle migrations                     |
+| `npm run db:generate`      | Generate a new migration from schema changes |
+| `npm run db:seed`          | Seed movies data                             |
+| `npm run db:link-products` | Create Stripe products and link movies       |
 
 ## Frontend setup
 
