@@ -1,0 +1,42 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx seed/run-seed.ts",
+    "db:seed:prices": "tsx seed/apply-price-migration.ts",
+    "db:baseline": "tsx seed/baseline-migrations.ts",
+    "db:fix-posters": "tsx seed/update-poster-urls.ts",
+    "db:link-products": "tsx seed/link-movie-products.ts"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.39.3",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.14.1",
+    "stripe": "^22.3.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.20.0",
+    "@types/pg": "^8.11.11",
+    "drizzle-kit": "^0.30.4",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

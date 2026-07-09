@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1782991605213,
+      "tag": "0000_initial_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782995599732,
+      "tag": "0001_cultured_daimon_hellstrom",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782999009336,
+      "tag": "0002_add_movie_price",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783335186419,
+      "tag": "0003_thankful_flatman",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1783344922434,
+      "tag": "0004_tired_susan_delgado",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1783428000000,
+      "tag": "0005_add_orders_receipt_paid",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783432800000,
+      "tag": "0006_add_orders_name",
+      "breakpoints": true
+    }
+  ]
+}
