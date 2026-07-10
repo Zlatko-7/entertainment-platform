@@ -36,7 +36,7 @@ project-root/
 │   ├── src/
 │   ├── migration/        # Drizzle SQL migrations (tracked in git)
 │   │   └── meta/
-│   ├── seed/
+│   ├── seed/             # Utility scripts (e.g. Stripe product linking)
 │   ├── package.json
 │   ├── .env.example
 │   └── .gitignore
@@ -108,7 +108,6 @@ The API runs on `http://localhost:3000` by default.
 | `npm run build`            | Compile TypeScript                           |
 | `npm run db:migrate`       | Apply Drizzle migrations                     |
 | `npm run db:generate`      | Generate a new migration from schema changes |
-| `npm run db:seed`          | Seed movies data                             |
 | `npm run db:link-products` | Create Stripe products and link movies       |
 
 ## Frontend setup
