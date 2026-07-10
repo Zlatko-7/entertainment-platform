@@ -9,10 +9,6 @@
     "start": "node dist/index.js",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx seed/run-seed.ts",
-    "db:seed:prices": "tsx seed/apply-price-migration.ts",
-    "db:baseline": "tsx seed/baseline-migrations.ts",
-    "db:fix-posters": "tsx seed/update-poster-urls.ts",
     "db:link-products": "tsx seed/link-movie-products.ts"
   },
   "dependencies": {
