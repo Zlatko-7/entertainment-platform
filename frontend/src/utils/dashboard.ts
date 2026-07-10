@@ -61,7 +61,7 @@ export function matchesMovieFilter(movie: Movie, filter: FilterOption) {
   if (filter === "all") return true;
   if (filter === "popular") return movie.rating >= 8;
   if (filter === "new") return movie.year >= new Date().getFullYear() - 1;
-  if (filter === "budget") return movie.rating < 6;
+  if (filter === "budget") return movie.price < 10;
   return true;
 }
 

@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router";
+import { toast } from "react-toastify";
 
 export default function SignUp() {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -45,10 +46,18 @@ export default function SignUp() {
         }),
       });
       const data = await res.json();
-      console.log("FORM DATA:", formData);
-      console.log(data);
+
+      if (!res.ok) {
+        throw new Error(data?.message ?? "Could not create account. Please try again.");
+      }
+
+      toast.success("Account created successfully");
     } catch (error) {
-      console.error("Error during signup:", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Could not create account. Please try again.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }

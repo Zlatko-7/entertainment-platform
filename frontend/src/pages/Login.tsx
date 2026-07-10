@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router";
 import { useUser } from "@/auth/useAuth";
 import { RouteUrls } from "@/routes/routes";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -51,7 +52,8 @@ export default function Login() {
       });
 
       if (!res.ok) {
-        throw new Error("Login failed");
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message ?? "Invalid email or password");
       }
 
       await res.json();
@@ -59,8 +61,11 @@ export default function Login() {
       // CURSOR: AWAIT getUser() BEFORE navigate("/") SO PRIVATE ROUTES RENDER WITH user SET
       await getUser();
       navigate(RouteUrls.movie);
+      toast.success("Logged in successfully");
     } catch (error) {
-      console.error("Error during login:", error);
+      const message =
+        error instanceof Error ? error.message : "Could not log in. Please try again.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }

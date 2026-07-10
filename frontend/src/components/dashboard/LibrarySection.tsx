@@ -10,6 +10,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 
 interface Order {
   id: string;
@@ -95,11 +96,12 @@ export function LibrarySection() {
         }
       } catch (err) {
         setOrders([]);
-        setError(
+        const message =
           err instanceof Error
             ? err.message
-            : "Something went wrong loading your library"
-        );
+            : "Something went wrong loading your library";
+        setError(message);
+        toast.error(message);
       } finally {
         setLoading(false);
       }

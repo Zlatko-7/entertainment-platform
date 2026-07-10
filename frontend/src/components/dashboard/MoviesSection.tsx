@@ -4,9 +4,10 @@ import CheckoutWrapper from "@/components/stripe/CheckoutWrapper";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import type { FilterOption, Movie } from "@/types/dashboard";
-import { formatPrice, matchesMovieFilter } from "@/utils/dashboard";
+import { formatPrice } from "@/utils/dashboard";
 import { Info, ShoppingBag, Star } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -30,14 +31,32 @@ export function MoviesSection({
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 10;
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+  const limit = 12;
 
-  async function fetchMovies(nextPage: number) {
+  async function fetchMovies(
+    nextPage: number,
+    search: string,
+    filter: FilterOption,
+  ) {
     setMoviesLoading(true);
     try {
+      const params = new URLSearchParams({
+        page: String(nextPage),
+        limit: String(limit),
+      });
+
+      if (search.trim()) {
+        params.set("search", search.trim());
+      }
+
+      if (filter !== "all") {
+        params.set("filter", filter);
+      }
+
       const res = await authFetch(
-        `${apiUrl}/api/get-movies?page=${nextPage}&limit=${limit}`,
-        { method: "GET" }
+        `${apiUrl}/api/get-movies?${params.toString()}`,
+        { method: "GET" },
       );
 
       if (!res.ok) throw new Error("Failed to load movies");
@@ -52,6 +71,7 @@ export function MoviesSection({
     } catch {
       setMovies([]);
       setTotalPages(1);
+      toast.error("Failed to load movies. Please try again.");
     } finally {
       setMoviesLoading(false);
     }
@@ -65,36 +85,36 @@ export function MoviesSection({
       if (!res.ok) throw new Error("Failed to load purchased items");
       const data = await res.json();
       setPurchasedItems(
-        Array.isArray(data.purchasedProducts) ? data.purchasedProducts : [],
+        Array.isArray(data.purchasedProducts) ? data.purchasedProducts : []
       );
     } catch (error) {
-      console.log(error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to load your purchases. Please try again.";
+      toast.error(message);
     }
   }
 
   useEffect(() => {
-    fetchMovies(page);
-  }, [page]);
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
 
-  // CURSOR PAGINATION: reset to first page when search or filter changes
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
   useEffect(() => {
     setPage(1);
-  }, [searchQuery, activeFilter]);
+  }, [debouncedSearch, activeFilter]);
+
+  useEffect(() => {
+    fetchMovies(page, debouncedSearch, activeFilter);
+  }, [page, debouncedSearch, activeFilter]);
 
   useEffect(() => {
     fetchPurchasedMovies();
   }, []);
-  console.log(purchasedItems, "purchased items");
-  const filteredMovies = useMemo(() => {
-    return movies.filter((movie) => {
-      const matchesSearch =
-        movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        movie.genre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        movie.director.toLowerCase().includes(searchQuery.toLowerCase());
-
-      return matchesSearch && matchesMovieFilter(movie, activeFilter);
-    });
-  }, [movies, searchQuery, activeFilter]);
 
   return (
     <>
@@ -109,7 +129,7 @@ export function MoviesSection({
         <p className="text-sm text-muted-foreground">Loading movies...</p>
       ) : (
         <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {filteredMovies.map((movie) => {
+          {movies.map((movie) => {
             const isPurchased = !!movie.productId
               ? purchasedItems.includes(movie.productId)
               : false;
@@ -263,7 +283,7 @@ export function MoviesSection({
         </div>
       ) : null}
 
-      {!moviesLoading && filteredMovies.length === 0 ? (
+      {!moviesLoading && movies.length === 0 ? (
         <p className="mt-6 text-sm text-muted-foreground">
           No movies match your search.
         </p>

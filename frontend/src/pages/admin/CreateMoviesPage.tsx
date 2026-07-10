@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Movie } from "@/types/dashboard";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -55,16 +56,20 @@ export default function CreateMoviesPage() {
       }
 
       if (!res.ok) {
-        throw new Error("Failed to add movie");
+        throw new Error("Failed to add movie. Please try again.");
       }
 
       const created: Movie = await res.json();
       setMovieForm(emptyForm);
       setMovieSuccess(`"${created.title}" was added successfully.`);
+      toast.success(`"${created.title}" was added successfully`);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to add movie";
+        error instanceof Error
+          ? error.message
+          : "Failed to add movie. Please try again.";
       setMovieError(message);
+      toast.error(message);
     } finally {
       setMovieSubmitting(false);
     }

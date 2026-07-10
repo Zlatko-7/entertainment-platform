@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router";
 import { RouteUrls } from "@/routes/urls";
 import { cn } from "@/lib/utils";
+import { toast } from "react-toastify";
 
 export default function DashboardLayout() {
   const { user, logout } = useUser();
@@ -20,10 +21,19 @@ export default function DashboardLayout() {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   async function handleLogout() {
-    await logout();
-    navigate(RouteUrls.login);
+    try {
+      await logout();
+      navigate(RouteUrls.login);
+      toast.success("Logged out successfully");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Could not log out. Please try again.";
+      toast.error(message);
+    }
   }
-  console.log(user, "user");
+
   return (
     <div className="fixed inset-0 z-10 flex flex-col bg-background">
       <header className="border-b border-border px-4 py-3 sm:px-6">

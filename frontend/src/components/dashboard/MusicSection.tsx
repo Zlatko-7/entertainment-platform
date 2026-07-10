@@ -18,10 +18,15 @@ interface MusicSectionProps {
 
 export function MusicSection({ searchQuery, activeFilter }: MusicSectionProps) {
   const filteredAlbums = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
     return albums.filter((album) => {
       const matchesSearch =
-        album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        album.artist.toLowerCase().includes(searchQuery.toLowerCase());
+        query.length === 0 ||
+        album.title.toLowerCase().includes(query) ||
+        album.artist.toLowerCase().includes(query) ||
+        album.tag.toLowerCase().includes(query);
+
       return (
         matchesSearch &&
         matchesAlbumFilter(album.price, album.tag, activeFilter)

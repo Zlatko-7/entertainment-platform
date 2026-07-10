@@ -2,6 +2,7 @@ import { authFetch } from "@/auth/api";
 import { Button } from "@/components/ui/button";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -26,18 +27,24 @@ export default function CheckoutForm({
 
   async function handlePay() {
     if (!movieId && !productId) {
-      setError("No movie or product selected.");
+      const message = "No movie or product selected.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
     if (!stripe || !elements) {
-      setError("Stripe is still loading. Try again in a moment.");
+      const message = "Stripe is still loading. Try again in a moment.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
     const cardElement = elements.getElement(CardElement);
     if (!cardElement) {
-      setError("Card details are missing.");
+      const message = "Card details are missing.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -81,11 +88,13 @@ export default function CheckoutForm({
       if (result.paymentIntent?.status === "succeeded") {
         setSuccess(true);
         onSuccess?.();
+        toast.success("Payment successful");
       }
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Something went wrong";
+        err instanceof Error ? err.message : "Payment failed. Please try again.";
       setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
