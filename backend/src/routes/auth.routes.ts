@@ -11,7 +11,7 @@ const router = Router();
 
 router.post("/signup", signup);
 router.post("/login", login);
-// CURSOR: /refresh-token HAS NO isAuthenticated — IT USES refreshToken COOKIE ONLY
+//  /refresh-token HAS NO isAuthenticated — IT USES refreshToken COOKIE ONLY
 router.post("/refresh-token", refresh);
 router.post("/logout", isAuthenticated, logout);
 router.get("/me", isAuthenticated, getMe);
