@@ -53,13 +53,10 @@ export default function CheckoutForm({
     setSuccess(false);
 
     try {
-      // CURSOS LAST CHANGE: send movieId only; no manual product ID needed
       const res = await authFetch(`${apiUrl}/api/stripe/create-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          movieId ? { movieId } : { productId },
-        ),
+        body: JSON.stringify(movieId ? { movieId } : { productId }),
       });
 
       const data = await res.json();
@@ -92,7 +89,9 @@ export default function CheckoutForm({
       }
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Payment failed. Please try again.";
+        err instanceof Error
+          ? err.message
+          : "Payment failed. Please try again.";
       setError(message);
       toast.error(message);
     } finally {
