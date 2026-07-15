@@ -5,7 +5,7 @@ import { logout } from "../controllers/logout.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { getMe } from "../controllers/me.js";
 import { refresh } from "../controllers/refreshToken.js";
-import { getMovies } from "../controllers/movies.js";
+import { getMoviesController } from "../controllers/movies.js";
 
 const router = Router();
 
@@ -15,6 +15,6 @@ router.post("/login", login);
 router.post("/refresh-token", refresh);
 router.post("/logout", isAuthenticated, logout);
 router.get("/me", isAuthenticated, getMe);
-router.get("/get-movies", getMovies);
+router.get("/get-movies", getMoviesController);
 
 export default router;

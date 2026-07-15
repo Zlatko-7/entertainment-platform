@@ -8,6 +8,7 @@ import paymentRoutes from "./routes/payment.routes.js";
 import stripeWebhookRoutes from "./routes/stripe-webhook.routes.js";
 import orderHistoryRoutes from "./routes/order-history-routes.js";
 import purchaedItemsRoutes from "./routes/purchasedProducts.routes.js";
+import errorMidleware from "./middleware/error.middleware.js";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/api/get-movies", movieRoutes);
 app.use("/api/stripe/create-payment", paymentRoutes);
 app.use("/api/order-history", orderHistoryRoutes);
 app.use("/api/purchased-items", purchaedItemsRoutes);
+app.use(errorMidleware);
 
 const PORT = process.env.PORT ?? 3000;
 

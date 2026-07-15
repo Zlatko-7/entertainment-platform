@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { createPayment } from "../controllers/createPayment.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { createPaymentController } from "../controllers/createPayment.js";
 
 const router = Router();
 // CURSOS LAST CHANGE: require login before creating a payment (userId for orders FK)
-router.post("/", isAuthenticated, createPayment);
+router.post("/", isAuthenticated, createPaymentController);
 
 export default router;
