@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
-import { AppError } from "../errors/AppError.js";
+import { AppError } from "../errors/app-error.js";
 
 export default function errorMidleware(
   error: unknown,

@@ -1,7 +1,7 @@
 import { db } from "../db/index.js";
 import { users } from "../db/schema.js";
 import { eq } from "drizzle-orm";
-import { signupSchema } from "../schemas/auth.schema.js";
+import { signupSchema } from "../schemas/auth-schema.js";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 

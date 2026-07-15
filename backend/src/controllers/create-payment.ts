@@ -1,12 +1,17 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { createPaymentService } from "../services/create-payment-service.js";
+import { AppError } from "../errors/app-error.js";
 
-export async function createPaymentController(req: Request, res: Response) {
+export async function createPaymentController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      throw new AppError("Unauthorized", 401);
     }
 
     const { productId, movieId } = req.body as {
@@ -18,7 +23,6 @@ export async function createPaymentController(req: Request, res: Response) {
 
     return res.json(results);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Initial server error" });
+    return next(error);
   }
 }

@@ -1,7 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { getMoives } from "../services/get-movies-service.js";
 
-export async function getMoviesController(req: Request, res: Response) {
+export async function getMoviesController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
@@ -12,7 +16,6 @@ export async function getMoviesController(req: Request, res: Response) {
 
     return res.json(result);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    return next(error);
   }
 }

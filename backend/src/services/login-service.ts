@@ -3,6 +3,7 @@ import { users, userTokens } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { AppError } from "../errors/app-error.js";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -15,6 +16,10 @@ export async function loginService({
   email: string;
   password: string;
 }) {
+  if (!JWT_SECRET) {
+    throw new AppError("JWT_SECRET is not set in environment", 500);
+  }
+
   const result = await db
     .select()
     .from(users)
@@ -23,16 +28,12 @@ export async function loginService({
   const user = result[0];
 
   if (!user) {
-    throw new Error("Invalid email or password");
+    throw new AppError("Invalid email or password", 401);
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    throw new Error("Invalid email or password");
-  }
-
-  if (!JWT_SECRET) {
-    throw new Error("JWT_SECRET is not set in environment");
+    throw new AppError("Invalid email or password", 401);
   }
 
   const accessToken = jwt.sign(

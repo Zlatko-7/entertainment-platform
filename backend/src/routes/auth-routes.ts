@@ -2,9 +2,9 @@ import { Router } from "express";
 import { signup } from "../controllers/signup.js";
 import { login } from "../controllers/login.js";
 import { logout } from "../controllers/logout.js";
-import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { isAuthenticated } from "../middleware/auth-middleware.js";
 import { getMe } from "../controllers/me.js";
-import { refresh } from "../controllers/refreshToken.js";
+import { refresh } from "../controllers/refresh-token.js";
 import { getMoviesController } from "../controllers/movies.js";
 
 const router = Router();

@@ -1,14 +1,14 @@
 import "dotenv/config";
 import cors from "cors";
 import express from "express";
-import authRoutes from "./routes/auth.routes.js";
+import authRoutes from "./routes/auth-routes.js";
 import cookieParser from "cookie-parser";
-import movieRoutes from "./routes/movie.routes.js";
-import paymentRoutes from "./routes/payment.routes.js";
-import stripeWebhookRoutes from "./routes/stripe-webhook.routes.js";
+import movieRoutes from "./routes/movie-routes.js";
+import paymentRoutes from "./routes/payment-routes.js";
+import stripeWebhookRoutes from "./routes/stripe-webhook-routes.js";
 import orderHistoryRoutes from "./routes/order-history-routes.js";
-import purchaedItemsRoutes from "./routes/purchasedProducts.routes.js";
-import errorMidleware from "./middleware/error.middleware.js";
+import purchaedItemsRoutes from "./routes/purchased-products-routes.js";
+import errorMidleware from "./middleware/error-middleware.js";
 
 const app = express();
 

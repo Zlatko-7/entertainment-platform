@@ -1,6 +1,7 @@
 import { count, desc, ilike, or } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { movies } from "../db/schema.js";
+import { AppError } from "../errors/app-error.js";
 
 export async function getMoives({
   page,
@@ -11,6 +12,14 @@ export async function getMoives({
   limit: number;
   search: string;
 }) {
+  if (!Number.isInteger(page) || page < 1) {
+    throw new AppError("page must be a positive integer", 400);
+  }
+
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new AppError("limit must be an integer between 1 and 100", 400);
+  }
+
   const offset = (page - 1) * limit;
   const searchCondition = search
     ? or(

@@ -1,3 +1,4 @@
+// CURSOS LAST CHANGE: resolve product from movieId (movies.product_id → products) for checkout
 import { and, eq } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { movies, orders, products } from "../db/schema.js";

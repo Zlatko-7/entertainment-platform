@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { loginSchema } from "../schemas/auth.schema.js";
+import { NextFunction, Request, Response } from "express";
+import { loginSchema } from "../schemas/auth-schema.js";
 
 import { loginService } from "../services/login-service.js";
 
@@ -12,12 +12,16 @@ const cookieOptions = {
   sameSite: "lax" as const,
 };
 
-export async function login(req: Request, res: Response) {
+export async function login(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { email, password } = loginSchema.parse(req.body);
 
     const result = await loginService({ email, password });
-    console.log(result, "result");
+
     res.cookie("accessToken", result.accessToken, {
       ...cookieOptions,
       maxAge: ACCESS_TOKEN_MAX_AGE,
@@ -33,7 +37,6 @@ export async function login(req: Request, res: Response) {
       user: result.user,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    return next(error);
   }
 }
