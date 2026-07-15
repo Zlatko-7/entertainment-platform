@@ -12,6 +12,13 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
+interface OrderMovie {
+  posterUrl: string | null;
+  year: number | null;
+  genre: string | null;
+  director: string | null;
+}
+
 interface Order {
   id: string;
   productId: string;
@@ -21,14 +28,8 @@ interface Order {
   status: string;
   createdAt: string;
   paidAt: string | null;
-  receiptUrl: string | null;
-}
-
-interface MovieLookup {
-  posterUrl: string;
-  year: number;
-  genre: string;
-  director: string;
+  invoiceUrl: string | null;
+  movie: OrderMovie | null;
 }
 
 function formatMoney(amountCents: number, currency: string) {
@@ -51,9 +52,6 @@ function formatPurchaseDate(value: string | null) {
 export function LibrarySection() {
   const apiUrl = import.meta.env.VITE_API_URL;
   const [orders, setOrders] = useState<Order[]>([]);
-  const [moviesByProductId, setMoviesByProductId] = useState<
-    Record<string, MovieLookup>
-  >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,12 +61,9 @@ export function LibrarySection() {
       setError(null);
 
       try {
-        const [ordersRes, moviesRes] = await Promise.all([
-          authFetch(`${apiUrl}/api/order-history`, { method: "GET" }),
-          authFetch(`${apiUrl}/api/get-movies?page=1&limit=100`, {
-            method: "GET",
-          }),
-        ]);
+        const ordersRes = await authFetch(`${apiUrl}/api/order-history`, {
+          method: "GET",
+        });
 
         if (!ordersRes.ok) {
           throw new Error("Could not load your purchases");
@@ -76,24 +71,6 @@ export function LibrarySection() {
 
         const ordersData = await ordersRes.json();
         setOrders(ordersData.data ?? []);
-
-        if (moviesRes.ok) {
-          const moviesData = await moviesRes.json();
-          const lookup: Record<string, MovieLookup> = {};
-
-          for (const movie of moviesData.data ?? []) {
-            if (movie.productId) {
-              lookup[movie.productId] = {
-                posterUrl: movie.posterUrl,
-                year: movie.year,
-                genre: movie.genre,
-                director: movie.director,
-              };
-            }
-          }
-
-          setMoviesByProductId(lookup);
-        }
       } catch (err) {
         setOrders([]);
         const message =
@@ -185,7 +162,7 @@ export function LibrarySection() {
       {!loading && !error && purchasedMovies.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {purchasedMovies.map((order) => {
-            const movie = moviesByProductId[order.productId];
+            const movie = order.movie;
             const purchaseDate = order.paidAt ?? order.createdAt;
 
             return (
@@ -264,14 +241,14 @@ export function LibrarySection() {
 
                   <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-                  {order.receiptUrl ? (
+                  {order.invoiceUrl ? (
                     <Button
                       variant="outline"
                       size="sm"
                       className="h-9 w-full gap-2 rounded-xl"
                     >
                       <a
-                        href={order.receiptUrl}
+                        href={order.invoiceUrl}
                         target="_blank"
                         rel="noreferrer"
                         className="flex flex-row gap-2 justifyc-center items-center"

@@ -274,10 +274,6 @@ export function MoviesSection({
                 setShowCheckout(false);
                 setCheckoutMovie(null);
               }}
-              onSuccess={() => {
-                setShowCheckout(false);
-                setCheckoutMovie(null);
-              }}
             />
           </div>
         </div>

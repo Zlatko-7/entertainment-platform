@@ -1,7 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Elements } from "@stripe/react-stripe-js";
-import { stripePromise } from "@/lib/stripe";
 import CheckoutForm from "./CheckoutForm";
 
 interface CheckoutWrapperProps {
@@ -10,7 +8,6 @@ interface CheckoutWrapperProps {
   productId?: string;
   title?: string;
   onClose?: () => void;
-  onSuccess?: () => void;
 }
 
 export default function CheckoutWrapper({
@@ -18,7 +15,6 @@ export default function CheckoutWrapper({
   productId,
   title = "Checkout",
   onClose,
-  onSuccess,
 }: CheckoutWrapperProps) {
   return (
     <Card className="w-full max-w-md shadow-lg">
@@ -32,14 +28,8 @@ export default function CheckoutWrapper({
       </CardHeader>
 
       <CardContent>
-        {/* CURSOR STRIPE PAYMENT: Elements provider loads publishable key once */}
-        <Elements stripe={stripePromise}>
-          <CheckoutForm
-            movieId={movieId}
-            productId={productId}
-            onSuccess={onSuccess}
-          />
-        </Elements>
+        {/* CHECKOUT SESSION FLOW: hosted Checkout does not need Elements. */}
+        <CheckoutForm movieId={movieId} productId={productId} />
       </CardContent>
     </Card>
   );
