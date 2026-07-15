@@ -1,27 +1,22 @@
-import { Request, Response } from "express";
-import { db } from "../db/index.js";
-import { orders } from "../db/schema.js";
-import { eq } from "drizzle-orm";
-
-export async function orderHistory(req: Request, res: Response) {
+import { NextFunction, Request, Response } from "express";
+import { orderHistoryService } from "../services/order-history-service.js";
+export async function orderHistory(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const ordersList = await db
-      .select()
-      .from(orders)
-      .where(eq(orders.userId, userId));
+    const { ordersList } = await orderHistoryService({ userId });
 
     return res.json({
       data: ordersList,
     });
   } catch (error) {
     console.error(error);
-
-    return res.status(500).json({
-      message: "Internal server error",
-    });
+    return next(error);
   }
 }

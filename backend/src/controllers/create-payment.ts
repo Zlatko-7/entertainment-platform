@@ -9,6 +9,7 @@ export async function createPaymentController(
 ) {
   try {
     const userId = req.user?.id;
+    const userEmail = req.user?.email;
 
     if (!userId) {
       throw new AppError("Unauthorized", 401);
@@ -19,7 +20,12 @@ export async function createPaymentController(
       movieId?: string;
     };
 
-    const results = await createPaymentService({ userId, movieId, productId });
+    const results = await createPaymentService({
+      userId,
+      movieId,
+      productId,
+      userEmail: userEmail || "",
+    });
 
     return res.json(results);
   } catch (error) {

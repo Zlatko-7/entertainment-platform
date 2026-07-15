@@ -15,15 +15,13 @@ export async function stripeWebhook(req: Request, res: Response) {
   let event: Stripe.Event;
 
   try {
-    console.log("STRIPE WEBHOOK HIT");
-
     event = stripe.webhooks.constructEvent(
       req.body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (error) {
-    console.error("Webhook signature error:", error);
+    console.error(error);
     return res.status(400).send("Webhook Error");
   }
 
@@ -36,29 +34,47 @@ export async function stripeWebhook(req: Request, res: Response) {
   }
 
   switch (event.type) {
-    case "payment_intent.succeeded": {
-      const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      console.log("Payment intent succeeded:", paymentIntent.id);
-      const charges = await stripe.charges.list({
-        payment_intent: paymentIntent.id,
-      });
-      console.log("CHARGES:", charges.data);
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
 
-      const receiptUrl = charges.data[0]?.receipt_url ?? null;
-      console.log("RECEIPT URL:", receiptUrl);
+      console.log("CHECKOUT COMPLETED:", session.id);
+
+      console.log("PAYMENT STATUS:", session.payment_status);
 
       const result = await db
         .update(orders)
-        .set({ status: "paid", paidAt: new Date(), receiptUrl })
-        .where(eq(orders.stripePaymentIntentId, paymentIntent.id))
+        .set({
+          status: "paid",
+          paidAt: new Date(),
+        })
+        .where(eq(orders.stripeCheckoutSessionId, session.id))
         .returning();
 
-      if (result.length === 0) {
-        console.error("Order not found for PaymentIntent:", paymentIntent.id);
+      console.log("UPDATED ORDER:", result);
 
-        return res.status(404).json({
-          message: "Order not found",
-        });
+      await db.insert(webhookEvents).values({
+        stripeEventId: event.id,
+        type: event.type,
+        processed: true,
+      });
+
+      break;
+    }
+
+    case "invoice.paid": {
+      const invoice = event.data.object as Stripe.Invoice;
+
+      const checkoutSessionId = invoice.metadata?.checkoutSessionId;
+
+      console.log("INVOICE PAID:", invoice.id);
+
+      if (invoice.hosted_invoice_url && checkoutSessionId) {
+        await db
+          .update(orders)
+          .set({
+            invoiceUrl: invoice.hosted_invoice_url,
+          })
+          .where(eq(orders.stripeCheckoutSessionId, checkoutSessionId));
       }
 
       await db.insert(webhookEvents).values({
@@ -66,17 +82,19 @@ export async function stripeWebhook(req: Request, res: Response) {
         type: event.type,
         processed: true,
       });
+
       break;
     }
 
-    case "payment_intent.payment_failed": {
-      const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      console.log("Payment intent failed:", paymentIntent.id);
+    case "checkout.session.expired": {
+      const session = event.data.object as Stripe.Checkout.Session;
 
       await db
         .update(orders)
-        .set({ status: "failed" })
-        .where(eq(orders.stripePaymentIntentId, paymentIntent.id));
+        .set({
+          status: "failed",
+        })
+        .where(eq(orders.stripeCheckoutSessionId, session.id));
 
       await db.insert(webhookEvents).values({
         stripeEventId: event.id,
@@ -89,8 +107,9 @@ export async function stripeWebhook(req: Request, res: Response) {
 
     default:
       console.log("Unhandled event:", event.type);
-      break;
   }
 
-  return res.json({ received: true });
+  return res.json({
+    received: true,
+  });
 }

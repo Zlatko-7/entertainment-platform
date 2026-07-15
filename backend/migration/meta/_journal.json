@@ -50,6 +50,13 @@
       "when": 1783432800000,
       "tag": "0006_add_orders_name",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1784116800000,
+      "tag": "0007_rename_receipt_url_to_invoice_url",
+      "breakpoints": true
     }
   ]
 }

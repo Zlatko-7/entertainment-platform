@@ -8,10 +8,12 @@ export async function createPaymentService({
   productId,
   userId,
   movieId,
+  userEmail,
 }: {
   userId: string;
   productId?: string;
   movieId?: string;
+  userEmail: string;
 }) {
   let resolvedProductId = productId;
 
@@ -43,9 +45,18 @@ export async function createPaymentService({
     throw new AppError("Product not found", 404);
   }
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: product.price,
-    currency: product.currency || "eur",
+  const session = await stripe.checkout.sessions.create({
+    mode: "payment",
+    customer_email: userEmail,
+    line_items: [
+      {
+        price: product.stripePriceId,
+        quantity: 1,
+      },
+    ],
+    invoice_creation: { enabled: true },
+    success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     metadata: {
       userId,
       productId: resolvedProductId,
@@ -56,7 +67,7 @@ export async function createPaymentService({
   await db.insert(orders).values({
     userId,
     productId: resolvedProductId,
-    stripePaymentIntentId: paymentIntent.id,
+    stripeCheckoutSessionId: session.id,
     amount: product.price,
     currency: product.currency,
     status: "pending",
@@ -64,6 +75,6 @@ export async function createPaymentService({
   });
 
   return {
-    clientSecret: paymentIntent.client_secret,
+    url: session.url,
   };
 }

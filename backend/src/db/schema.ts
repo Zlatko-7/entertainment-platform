@@ -41,7 +41,6 @@ export const movies = pgTable("movies", {
   synopsis: text("synopsis").notNull(),
   posterUrl: text("poster_url").notNull(),
   price: real("price").notNull(),
-  // CURSOS LAST CHANGE: FK links each movie to a row in products for Stripe checkout
   productId: uuid("product_id").references(() => products.id, {
     onDelete: "set null",
   }),
@@ -106,7 +105,7 @@ export const orders = pgTable("orders", {
   currency: text("currency").notNull(),
   status: text("status").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  receiptUrl: text("receipt_url"),
+  invoiceUrl: text("invoice_url"),
   paidAt: timestamp("paid_at"),
   orderName: text("order_name").notNull(),
 });
