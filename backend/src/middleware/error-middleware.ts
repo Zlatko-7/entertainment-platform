@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { AppError } from "../errors/app-error.js";
 
-export default function errorMidleware(
+export default function errorMiddleware(
   error: unknown,
   req: Request,
   res: Response,

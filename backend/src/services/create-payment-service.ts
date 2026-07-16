@@ -54,8 +54,7 @@ export async function createPaymentService({
         quantity: 1,
       },
     ],
-    // INVOICE URL FIX: PASS METADATA ONTO THE GENERATED INVOICE SO invoice.paid
-    // CAN MATCH THE ORDER EVEN WHEN CHECKOUT SESSION ID IS NOT AVAILABLE YET.
+
     invoice_creation: {
       enabled: true,
       invoice_data: {

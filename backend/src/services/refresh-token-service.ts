@@ -5,7 +5,7 @@ import { db } from "../db/index.js";
 import { users, userTokens } from "../db/schema.js";
 import { AppError } from "../errors/app-error.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export async function refreshTokenService({
   refreshToken,
@@ -14,10 +14,6 @@ export async function refreshTokenService({
 }) {
   if (!refreshToken) {
     throw new AppError("No refresh token", 401);
-  }
-
-  if (!JWT_SECRET) {
-    throw new AppError("JWT_SECRET is not set in environment", 500);
   }
 
   let decoded: { id: string };

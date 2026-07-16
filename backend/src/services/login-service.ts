@@ -16,10 +16,6 @@ export async function loginService({
   email: string;
   password: string;
 }) {
-  if (!JWT_SECRET) {
-    throw new AppError("JWT_SECRET is not set in environment", 500);
-  }
-
   const result = await db
     .select()
     .from(users)
