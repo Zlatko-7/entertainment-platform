@@ -1,19 +1,18 @@
 import { Router } from "express";
-import { signup } from "../controllers/signup.js";
-import { login } from "../controllers/login.js";
-import { logout } from "../controllers/logout.js";
+import { signupController } from "../controllers/signup.js";
+import { loginController } from "../controllers/login.js";
+import { logoutController } from "../controllers/logout.js";
 import { isAuthenticated } from "../middleware/auth-middleware.js";
 import { getMeController } from "../controllers/me.js";
-import { refresh } from "../controllers/refresh-token.js";
+import { refreshTokenController } from "../controllers/refresh-token.js";
 import { getMoviesController } from "../controllers/movies.js";
 
 const router = Router();
 
-router.post("/signup", signup);
-router.post("/login", login);
-//  /refresh-token HAS NO isAuthenticated — IT USES refreshToken COOKIE ONLY
-router.post("/refresh-token", refresh);
-router.post("/logout", isAuthenticated, logout);
+router.post("/signup", signupController);
+router.post("/login", loginController);
+router.post("/refresh-token", refreshTokenController);
+router.post("/logout", isAuthenticated, logoutController);
 router.get("/me", isAuthenticated, getMeController);
 router.get("/get-movies", getMoviesController);
 

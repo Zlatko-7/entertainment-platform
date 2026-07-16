@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { purchasedItemsServices } from "../services/purchased-items-service.js";
+import { purchasedItemsService } from "../services/purchased-items-service.js";
 
 export async function purchasedItemsController(
   req: Request,
@@ -8,11 +8,10 @@ export async function purchasedItemsController(
 ) {
   try {
     const userId = req.user?.id;
-    const result = await purchasedItemsServices({ userId });
+    const result = await purchasedItemsService({ userId });
 
-    return res.json(result);
+    return res.status(200).json(result);
   } catch (error) {
-    console.log(error);
     return next(error);
   }
 }

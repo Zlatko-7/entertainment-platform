@@ -1,14 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { eq } from "drizzle-orm";
-import { db } from "../db/index.js";
-import { users } from "../db/schema.js";
-import { stripe } from "../lib/stripe.js";
 import { AppError } from "../errors/app-error.js";
+import { createStripeCustomerService } from "../services/stripe-create-customer-service.js";
 
-export async function createStripeCustomerId(
+export async function createStripeCustomerController(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const userId = req.user?.id;
@@ -17,29 +14,8 @@ export async function createStripeCustomerId(
       throw new AppError("Unauthorized", 401);
     }
 
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-    });
-
-    if (!user) {
-      throw new AppError("User not found", 404);
-    }
-
-    const customer = await stripe.customers.create({
-      email: user.email,
-      name: user.name,
-    });
-
-    await db
-      .update(users)
-      .set({
-        stripeCustomerId: customer.id,
-      })
-      .where(eq(users.id, userId));
-
-    return res.json({
-      stripeCustomerId: customer.id,
-    });
+    const result = await createStripeCustomerService({ userId });
+    return res.status(200).json(result);
   } catch (error) {
     return next(error);
   }

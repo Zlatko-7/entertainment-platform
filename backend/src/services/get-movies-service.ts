@@ -3,7 +3,7 @@ import { db } from "../db/index.js";
 import { movies } from "../db/schema.js";
 import { AppError } from "../errors/app-error.js";
 
-export async function getMoives({
+export async function getMoviesService({
   page,
   limit,
   search,

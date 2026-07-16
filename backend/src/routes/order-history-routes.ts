@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { orderHistory } from "../controllers/order-history.js";
+import { orderHistoryController } from "../controllers/order-history.js";
 import { isAuthenticated } from "../middleware/auth-middleware.js";
 
 const router = Router();
-router.get("/", isAuthenticated, orderHistory);
+router.get("/", isAuthenticated, orderHistoryController);
 
 export default router;

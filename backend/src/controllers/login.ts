@@ -12,7 +12,7 @@ const cookieOptions = {
   sameSite: "lax" as const,
 };
 
-export async function login(
+export async function loginController(
   req: Request,
   res: Response,
   next: NextFunction

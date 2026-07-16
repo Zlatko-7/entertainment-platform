@@ -3,7 +3,7 @@ import { db } from "../db/index.js";
 import { orders } from "../db/schema.js";
 import { AppError } from "../errors/app-error.js";
 
-export async function purchasedItemsServices({ userId }: { userId?: string }) {
+export async function purchasedItemsService({ userId }: { userId?: string }) {
   if (!userId) {
     throw new AppError("Unauthorized", 401);
   }

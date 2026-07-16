@@ -1,22 +1,25 @@
 import { NextFunction, Request, Response } from "express";
+import { AppError } from "../errors/app-error.js";
 import { orderHistoryService } from "../services/order-history-service.js";
-export async function orderHistory(
+
+export async function orderHistoryController(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const userId = req.user?.id;
+
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      throw new AppError("Unauthorized", 401);
     }
+
     const { ordersList } = await orderHistoryService({ userId });
 
-    return res.json({
+    return res.status(200).json({
       data: ordersList,
     });
   } catch (error) {
-    console.error(error);
     return next(error);
   }
 }

@@ -1,42 +1,21 @@
-import { db } from "../db/index.js";
-import { users } from "../db/schema.js";
-import { eq } from "drizzle-orm";
+import { NextFunction, Request, Response } from "express";
 import { signupSchema } from "../schemas/auth-schema.js";
-import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import { signupService } from "../services/signup-service.js";
 
-export async function signup(req: Request, res: Response) {
+export async function signupController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const { name, email, password } = signupSchema.parse(req.body);
-    const existingEmail = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email));
-    if (existingEmail.length > 0) {
-      return res.status(400).json({ error: "Email already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const [newUser] = await db
-      .insert(users)
-      .values({
-        name,
-        email,
-        password: hashedPassword,
-        role: "user",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .returning();
+    const user = await signupService({ name, email, password });
 
     return res.status(201).json({
       message: "User registered successfully",
-      users: {
-        newUser,
-      },
+      user,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Internal server error" });
+    return next(error);
   }
 }

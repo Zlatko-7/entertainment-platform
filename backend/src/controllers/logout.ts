@@ -1,7 +1,6 @@
-import { db } from "../db/index.js";
-import { userTokens } from "../db/schema.js";
-import { eq } from "drizzle-orm";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { AppError } from "../errors/app-error.js";
+import { logoutService } from "../services/logout-service.js";
 
 const cookieOptions = {
   httpOnly: true,
@@ -9,23 +8,25 @@ const cookieOptions = {
   sameSite: "lax" as const,
 };
 
-export async function logout(req: Request, res: Response) {
+export async function logoutController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
-    const user = req.user;
+    const userId = req.user?.id;
 
-    if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
+    if (!userId) {
+      throw new AppError("Unauthorized", 401);
     }
 
-    // CURSOR: DELETE DB REFRESH TOKEN + CLEAR BOTH httpOnly COOKIES
-    await db.delete(userTokens).where(eq(userTokens.userId, user.id));
+    await logoutService({ userId });
 
     res.clearCookie("accessToken", cookieOptions);
     res.clearCookie("refreshToken", cookieOptions);
 
     return res.status(200).json({ message: "User logged out successfully" });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
+    return next(error);
   }
 }

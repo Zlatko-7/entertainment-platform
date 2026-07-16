@@ -54,7 +54,18 @@ export async function createPaymentService({
         quantity: 1,
       },
     ],
-    invoice_creation: { enabled: true },
+    // INVOICE URL FIX: PASS METADATA ONTO THE GENERATED INVOICE SO invoice.paid
+    // CAN MATCH THE ORDER EVEN WHEN CHECKOUT SESSION ID IS NOT AVAILABLE YET.
+    invoice_creation: {
+      enabled: true,
+      invoice_data: {
+        metadata: {
+          userId,
+          productId: resolvedProductId,
+          movieId: movieId ?? "",
+        },
+      },
+    },
     success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     metadata: {
