@@ -1,9 +1,7 @@
--- CURSOR MIGRATION: Stripe billing tables + users.stripte_customer_id
 -- Safe additive migration: no DROP, no DELETE, existing rows are preserved.
 -- New tables: products, subscriptions, orders, webhook_events
 -- Altered table: users (optional Stripe customer id column)
 
--- CURSOR MIGRATION: one-time Stripe checkout / payment records
 CREATE TABLE "orders" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
@@ -19,7 +17,6 @@ CREATE TABLE "orders" (
 );
 --> statement-breakpoint
 
--- CURSOR MIGRATION: sellable plans synced from Stripe (product + price)
 CREATE TABLE "products" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
@@ -36,7 +33,6 @@ CREATE TABLE "products" (
 );
 --> statement-breakpoint
 
--- CURSOR MIGRATION: recurring subscription state per user + product
 CREATE TABLE "subscriptions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
@@ -53,7 +49,6 @@ CREATE TABLE "subscriptions" (
 );
 --> statement-breakpoint
 
--- CURSOR MIGRATION: idempotent Stripe webhook processing log
 CREATE TABLE "webhook_events" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"stripe_event_id" text NOT NULL,
@@ -64,16 +59,12 @@ CREATE TABLE "webhook_events" (
 );
 --> statement-breakpoint
 
--- CURSOR MIGRATION: link app users to Stripe customers (nullable — existing users unchanged)
 ALTER TABLE "users" ADD COLUMN "stripte_customer_id" text;--> statement-breakpoint
 
--- CURSOR MIGRATION: foreign keys for orders
 ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "orders" ADD CONSTRAINT "orders_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 
--- CURSOR MIGRATION: foreign keys for subscriptions
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 
--- CURSOR MIGRATION: unique Stripe customer id when set
 ALTER TABLE "users" ADD CONSTRAINT "users_stripte_customer_id_unique" UNIQUE("stripte_customer_id");
