@@ -1,4 +1,3 @@
-// CURSOR: ON 401 FROM /me (OR OTHER AUTH REQUESTS) AUTO-CALL /refresh-token THEN RETRY ONCE
 const apiUrl = import.meta.env.VITE_API_URL;
 
 let refreshPromise: Promise<boolean> | null = null;
@@ -32,7 +31,7 @@ function shouldSkipRefresh(url: string) {
 
 export async function authFetch(
   input: string,
-  init?: RequestInit,
+  init?: RequestInit
 ): Promise<Response> {
   const response = await fetch(input, {
     ...init,

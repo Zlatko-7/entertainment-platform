@@ -22,7 +22,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   const [user, setUser] = useState<User | null>(null);
-  // CURSOR: loading=true ONLY DURING INITIAL /me ON APP LOAD — NOT ON LOGIN/LOGOUT REFETCH
   const [loading, setLoading] = useState(true);
 
   async function fetchMe(): Promise<User | null> {
@@ -50,7 +49,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // CURSOR: getUser() UPDATES STATE WITHOUT TOUCHING loading — USED AFTER LOGIN
   async function getUser() {
     try {
       const me = await fetchMe();

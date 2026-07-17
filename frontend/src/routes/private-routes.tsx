@@ -6,6 +6,7 @@ import SubscriptionsPage from "@/pages/admin/SubscriptionsPage";
 import LibraryPage from "@/pages/LibraryPage";
 import MoviesPage from "@/pages/MoviesPage";
 import MusicPage from "@/pages/MusicPage";
+import NotFound from "@/pages/NotFound";
 import { RouteUrls } from "@/routes/urls";
 import { Navigate, Route, Routes } from "react-router";
 
@@ -32,7 +33,7 @@ export function PrivateRoutes() {
       </Route>
 
       <Route path="/" element={<Navigate to={RouteUrls.movie} replace />} />
-      <Route path="*" element={<Navigate to={RouteUrls.movie} replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

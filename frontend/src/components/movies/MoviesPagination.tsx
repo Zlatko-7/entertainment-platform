@@ -53,12 +53,10 @@ export function MoviesPagination({
       aria-label="Movies pagination"
       className="mt-10 flex flex-col items-center gap-3"
     >
-      {/* CURSOR PAGINATION: premium status label above the control bar */}
       <p className="text-[11px] font-medium tracking-[0.22em] text-muted-foreground uppercase">
         Page {page} of {totalPages}
       </p>
 
-      {/* CURSOR PAGINATION: glass-style pill container for numbered controls */}
       <div className="inline-flex items-center gap-1 rounded-2xl border border-border/60 bg-card/90 p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] ring-1 ring-black/[0.03] backdrop-blur-sm">
         <Button
           type="button"
@@ -72,7 +70,6 @@ export function MoviesPagination({
           <ChevronLeft className="size-4" />
         </Button>
 
-        {/* CURSOR PAGINATION: numbered page buttons with active-state emphasis */}
         {visiblePages.map((item, index) =>
           item === "ellipsis" ? (
             <span

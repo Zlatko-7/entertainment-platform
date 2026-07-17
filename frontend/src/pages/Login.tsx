@@ -54,7 +54,6 @@ export default function Login() {
 
       await res.json();
 
-      // CURSOR: AWAIT getUser() BEFORE navigate("/") SO PRIVATE ROUTES RENDER WITH user SET
       await getUser();
       navigate(RouteUrls.movie);
       toast.success("Logged in successfully");

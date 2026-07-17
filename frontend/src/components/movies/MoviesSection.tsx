@@ -37,7 +37,7 @@ export function MoviesSection({
   async function fetchMovies(
     nextPage: number,
     search: string,
-    filter: FilterOption,
+    filter: FilterOption
   ) {
     setMoviesLoading(true);
     try {
@@ -56,7 +56,7 @@ export function MoviesSection({
 
       const res = await authFetch(
         `${apiUrl}/api/get-movies?${params.toString()}`,
-        { method: "GET" },
+        { method: "GET" }
       );
 
       if (!res.ok) throw new Error("Failed to load movies");
@@ -221,7 +221,6 @@ export function MoviesSection({
                         type="button"
                         size="sm"
                         className="h-9 gap-1.5 rounded-xl bg-foreground px-3 text-background shadow-[0_8px_24px_rgba(0,0,0,0.18)] transition-all duration-300 hover:bg-foreground/90 hover:shadow-[0_12px_32px_rgba(0,0,0,0.22)]"
-                        // CURSOS LAST CHANGE: open checkout only when movie has linked product
                         onClick={() => {
                           if (!movie.productId) return;
                           setCheckoutMovie(movie);
