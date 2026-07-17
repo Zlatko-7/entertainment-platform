@@ -1,4 +1,4 @@
-import { MusicSection } from "@/components/dashboard/MusicSection";
+import { MusicSection } from "@/components/music/MusicSection";
 import type { DashboardOutletContext } from "@/types/dashboard";
 import { useOutletContext } from "react-router";
 

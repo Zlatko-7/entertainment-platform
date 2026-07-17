@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import type { Movie } from "@/types/dashboard";
-import { formatPrice, getMovieCast } from "@/utils/dashboard";
+import { formatPrice, getMovieCast } from "@/lib/dashboard";
 import { Star } from "lucide-react";
 
 interface MovieDetailsModalProps {

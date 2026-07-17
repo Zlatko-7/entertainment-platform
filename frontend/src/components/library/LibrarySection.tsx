@@ -1,6 +1,7 @@
 import { authFetch } from "@/auth/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 import {
   Calendar,
   CheckCircle2,
@@ -9,7 +10,7 @@ import {
   Library,
   Receipt,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 
 interface OrderMovie {
@@ -49,43 +50,41 @@ function formatPurchaseDate(value: string | null) {
   }).format(new Date(value));
 }
 
+async function fetchOrderHistory(apiUrl: string): Promise<Order[]> {
+  const ordersRes = await authFetch(`${apiUrl}/api/order-history`, {
+    method: "GET",
+  });
+
+  if (!ordersRes.ok) {
+    throw new Error("Could not load your purchases");
+  }
+
+  const ordersData = await ordersRes.json();
+  return ordersData.data ?? [];
+}
+
 export function LibrarySection() {
   const apiUrl = import.meta.env.VITE_API_URL;
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  const {
+    data: orders = [],
+    isPending: loading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["order-history"],
+    queryFn: () => fetchOrderHistory(apiUrl),
+  });
 
   useEffect(() => {
-    async function loadLibrary() {
-      setLoading(true);
-      setError(null);
+    if (!isError || !error) return;
 
-      try {
-        const ordersRes = await authFetch(`${apiUrl}/api/order-history`, {
-          method: "GET",
-        });
-
-        if (!ordersRes.ok) {
-          throw new Error("Could not load your purchases");
-        }
-
-        const ordersData = await ordersRes.json();
-        setOrders(ordersData.data ?? []);
-      } catch (err) {
-        setOrders([]);
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Something went wrong loading your library";
-        setError(message);
-        toast.error(message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadLibrary();
-  }, [apiUrl]);
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : "Something went wrong loading your library",
+    );
+  }, [isError, error]);
 
   const purchasedMovies = useMemo(
     () =>
@@ -94,9 +93,9 @@ export function LibrarySection() {
         .sort(
           (a, b) =>
             new Date(b.paidAt ?? b.createdAt).getTime() -
-            new Date(a.paidAt ?? a.createdAt).getTime()
+            new Date(a.paidAt ?? a.createdAt).getTime(),
         ),
-    [orders]
+    [orders],
   );
 
   return (
@@ -140,13 +139,15 @@ export function LibrarySection() {
         </div>
       ) : null}
 
-      {!loading && error ? (
+      {!loading && isError ? (
         <div className="rounded-2xl border border-destructive/20 bg-destructive/5 px-5 py-4 text-sm text-destructive">
-          {error}
+          {error instanceof Error
+            ? error.message
+            : "Something went wrong loading your library"}
         </div>
       ) : null}
 
-      {!loading && !error && purchasedMovies.length === 0 ? (
+      {!loading && !isError && purchasedMovies.length === 0 ? (
         <div className="flex min-h-[22rem] flex-col items-center justify-center rounded-3xl border border-dashed border-border bg-gradient-to-b from-muted/30 to-muted/10 px-6 text-center">
           <div className="mb-4 flex size-14 items-center justify-center rounded-2xl border border-border bg-background shadow-sm">
             <Library className="size-7 text-muted-foreground" />
@@ -159,7 +160,7 @@ export function LibrarySection() {
         </div>
       ) : null}
 
-      {!loading && !error && purchasedMovies.length > 0 ? (
+      {!loading && !isError && purchasedMovies.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {purchasedMovies.map((order) => {
             const movie = order.movie;

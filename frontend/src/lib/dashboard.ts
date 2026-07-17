@@ -1,5 +1,5 @@
-import type { Album, FilterOption, Movie } from "@/types/dashboard";
 import { RouteUrls } from "@/routes/urls";
+import type { Album, FilterOption, Movie } from "@/types/dashboard";
 import { Film, Library, Music2 } from "lucide-react";
 
 export const filterOptions: { id: FilterOption; label: string }[] = [

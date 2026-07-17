@@ -1,4 +1,4 @@
-import { MoviesSection } from "@/components/dashboard/MoviesSection";
+import { MoviesSection } from "@/components/movies/MoviesSection";
 import type { DashboardOutletContext } from "@/types/dashboard";
 import { useOutletContext } from "react-router";
 

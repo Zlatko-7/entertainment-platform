@@ -1,10 +1,10 @@
 import { authFetch } from "@/auth/api";
-import { MoviesPagination } from "@/components/dashboard/MoviesPagination";
+import { MoviesPagination } from "@/components/movies/MoviesPagination";
 import CheckoutWrapper from "@/components/stripe/CheckoutWrapper";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { formatPrice } from "@/lib/dashboard";
 import type { FilterOption, Movie } from "@/types/dashboard";
-import { formatPrice } from "@/utils/dashboard";
 import { Info, ShoppingBag, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";

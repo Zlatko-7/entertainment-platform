@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { adminNavItems } from "@/utils/admin";
+import { adminNavItems } from "@/lib/admin";
 import { NavLink } from "react-router";
 
 export function AdminSidebar() {

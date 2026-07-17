@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { FilterOption } from "@/types/dashboard";
-import { albums, formatPrice, matchesAlbumFilter } from "@/utils/dashboard";
+import { albums, formatPrice, matchesAlbumFilter } from "@/lib/dashboard";
 import { Disc3, ShoppingBag } from "lucide-react";
 import { useMemo } from "react";
 

@@ -1,10 +1,10 @@
 import { useUser } from "@/auth/useAuth";
-import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
-import { MovieDetailsModal } from "@/components/dashboard/MovieDetailsModal";
+import { DashboardSidebar } from "@/components/layout/DashboardSidebar";
+import { MovieDetailsModal } from "@/components/movies/MovieDetailsModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { filterOptions, navItems } from "@/lib/dashboard";
 import type { FilterOption, Movie } from "@/types/dashboard";
-import { filterOptions, navItems } from "@/utils/dashboard";
 import { LogOut, Search, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router";

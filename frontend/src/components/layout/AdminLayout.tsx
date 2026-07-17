@@ -1,5 +1,5 @@
 import { useUser } from "@/auth/useAuth";
-import { AdminSidebar } from "@/components/dashboard/AdminSidebar";
+import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import { ShieldAlert } from "lucide-react";
 import { Outlet } from "react-router";
 

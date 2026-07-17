@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { navItems } from "@/utils/dashboard";
+import { navItems } from "@/lib/dashboard";
 import { NavLink } from "react-router";
 
 export function DashboardSidebar() {
