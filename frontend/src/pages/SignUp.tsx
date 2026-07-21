@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,61 +9,57 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import { FormInput } from "@/components/form/form-input";
+import { signupSchema, type SignupFormData } from "@/lib/schemas/signup-schema";
 
 export default function SignUp() {
   const apiUrl = import.meta.env.VITE_API_URL;
+  const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
+  const { control, handleSubmit } = useForm<SignupFormData>({
+    resolver: yupResolver(signupSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
   });
-  const [loading, setLoading] = useState(false);
 
-  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  }
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
-    try {
+  const signupMutation = useMutation({
+    mutationFn: async (values: SignupFormData) => {
       const res = await fetch(`${apiUrl}/api/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
+        credentials: "include",
+        body: JSON.stringify(values),
       });
-      const data = await res.json();
+
+      const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(data?.message ?? "Could not create account. Please try again.");
+        throw new Error(
+          data?.message ?? "Could not create account. Please try again."
+        );
       }
 
+      return data;
+    },
+    onSuccess: () => {
       toast.success("Account created successfully");
-    } catch (error) {
+      navigate("/login");
+    },
+    onError: (error) => {
       const message =
         error instanceof Error
           ? error.message
           : "Could not create account. Please try again.";
       toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  }
+    },
+  });
 
   return (
     <Card className="w-full max-w-md">
@@ -73,54 +71,48 @@ export default function SignUp() {
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              type="text"
-              id="name"
-              name="name"
-              placeholder="Jane Doe"
-              required
-              value={formData.name}
-              onChange={handleChange}
-            />
-          </div>
+        <form
+          onSubmit={handleSubmit((data) => signupMutation.mutate(data))}
+          className="space-y-4"
+        >
+          <FormInput
+            control={control}
+            name="name"
+            label="Name"
+            placeholder="Jane Doe"
+            type="text"
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="you@example.com"
-              required
-              value={formData.email}
-              onChange={handleChange}
-            />
-          </div>
+          <FormInput
+            control={control}
+            name="email"
+            label="Email"
+            placeholder="you@example.com"
+            type="email"
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="••••••••"
-              required
-              value={formData.password}
-              onChange={handleChange}
-            />
-          </div>
+          <FormInput
+            control={control}
+            name="password"
+            label="Password"
+            placeholder="••••••••"
+            type="password"
+          />
 
-          <Button type="submit" className="w-full" size="lg" disabled={loading}>
-            {loading ? "Creating account…" : "Sign up"}
+          <Button
+            type="submit"
+            className="w-full"
+            size="lg"
+            disabled={signupMutation.isPending}
+          >
+            {signupMutation.isPending ? "Creating account…" : "Sign up"}
           </Button>
         </form>
+
         <div className="mt-4 text-center text-sm text-muted-foreground">
           Back to Login{" "}
           <Link
-            to="/login"
+            to={"/login"}
             className="font-medium text-primary underline underline-offset-4 hover:opacity-80 transition"
           >
             Login
