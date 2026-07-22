@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useContext, createContext } from "react";
-import { authFetch, refreshAccessToken } from "./api";
-
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  name: string;
-}
+import { refreshAccessToken } from "@/auth/api";
+import type { User } from "@/api/auth";
+import { useLogoutMutation } from "@/hooks/queries/mutations/use-logout-mutation";
+import { queryKeys } from "@/hooks/queries/query-keys";
+import { useMeQuery } from "@/hooks/queries/use-me-query";
+import { useQueryClient } from "@tanstack/react-query";
+import React, { createContext, useContext } from "react";
 
 interface UserContextType {
   user: User | null;
@@ -19,70 +17,29 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const apiUrl = import.meta.env.VITE_API_URL;
-
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  async function fetchMe(): Promise<User | null> {
-    const res = await authFetch(`${apiUrl}/api/auth/me`, {
-      method: "GET",
-    });
-
-    if (!res.ok) {
-      return null;
-    }
-
-    return res.json();
-  }
-
-  async function bootstrapAuth() {
-    setLoading(true);
-
-    try {
-      const me = await fetchMe();
-      setUser(me);
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const queryClient = useQueryClient();
+  const { data: user = null, isPending: loading, refetch } = useMeQuery();
+  const logoutMutation = useLogoutMutation();
 
   async function getUser() {
-    try {
-      const me = await fetchMe();
-      setUser(me);
-    } catch {
-      setUser(null);
-    }
+    await refetch();
   }
 
   async function refreshSession() {
     const refreshed = await refreshAccessToken();
 
     if (refreshed) {
-      await getUser();
+      await refetch();
     } else {
-      setUser(null);
+      queryClient.setQueryData(queryKeys.me, null);
     }
 
     return refreshed;
   }
 
   async function logout() {
-    try {
-      await authFetch(`${apiUrl}/api/auth/logout`, {
-        method: "POST",
-      });
-    } finally {
-      setUser(null);
-    }
+    await logoutMutation.mutateAsync();
   }
-
-  useEffect(() => {
-    bootstrapAuth();
-  }, []);
 
   return (
     <UserContext.Provider

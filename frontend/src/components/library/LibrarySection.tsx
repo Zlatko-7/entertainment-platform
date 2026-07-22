@@ -1,7 +1,6 @@
-import { authFetch } from "@/auth/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useOrderHistoryQuery } from "@/hooks/queries/use-order-history-query";
 import {
   Calendar,
   CheckCircle2,
@@ -12,26 +11,6 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
-
-interface OrderMovie {
-  posterUrl: string | null;
-  year: number | null;
-  genre: string | null;
-  director: string | null;
-}
-
-interface Order {
-  id: string;
-  productId: string;
-  orderName: string;
-  amount: number;
-  currency: string;
-  status: string;
-  createdAt: string;
-  paidAt: string | null;
-  invoiceUrl: string | null;
-  movie: OrderMovie | null;
-}
 
 function formatMoney(amountCents: number, currency: string) {
   return new Intl.NumberFormat("en-US", {
@@ -50,31 +29,13 @@ function formatPurchaseDate(value: string | null) {
   }).format(new Date(value));
 }
 
-async function fetchOrderHistory(apiUrl: string): Promise<Order[]> {
-  const ordersRes = await authFetch(`${apiUrl}/api/order-history`, {
-    method: "GET",
-  });
-
-  if (!ordersRes.ok) {
-    throw new Error("Could not load your purchases");
-  }
-
-  const ordersData = await ordersRes.json();
-  return ordersData.data ?? [];
-}
-
 export function LibrarySection() {
-  const apiUrl = import.meta.env.VITE_API_URL;
-
   const {
     data: orders = [],
     isPending: loading,
     isError,
     error,
-  } = useQuery({
-    queryKey: ["order-history"],
-    queryFn: () => fetchOrderHistory(apiUrl),
-  });
+  } = useOrderHistoryQuery();
 
   useEffect(() => {
     if (!isError || !error) return;
@@ -82,7 +43,7 @@ export function LibrarySection() {
     toast.error(
       error instanceof Error
         ? error.message
-        : "Something went wrong loading your library",
+        : "Something went wrong loading your library"
     );
   }, [isError, error]);
 
@@ -93,9 +54,9 @@ export function LibrarySection() {
         .sort(
           (a, b) =>
             new Date(b.paidAt ?? b.createdAt).getTime() -
-            new Date(a.paidAt ?? a.createdAt).getTime(),
+            new Date(a.paidAt ?? a.createdAt).getTime()
         ),
-    [orders],
+    [orders]
   );
 
   return (

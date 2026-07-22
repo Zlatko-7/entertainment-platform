@@ -1,13 +1,10 @@
-import { authFetch } from "@/auth/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Movie } from "@/types/dashboard";
+import { useCreateMovieMutation } from "@/hooks/queries/mutations/use-create-movie-mutation";
 import { useState } from "react";
 import { toast } from "react-toastify";
-
-const apiUrl = import.meta.env.VITE_API_URL;
 
 const emptyForm = {
   title: "",
@@ -17,62 +14,56 @@ const emptyForm = {
   genre: "",
   cast: "",
   synopsis: "",
-  posterUrl: "",
+  price: "9.99",
+  poster: null as File | null,
 };
 
 export default function CreateMoviesPage() {
-  const [movieSubmitting, setMovieSubmitting] = useState(false);
-  const [movieError, setMovieError] = useState<string | null>(null);
   const [movieSuccess, setMovieSuccess] = useState<string | null>(null);
   const [movieForm, setMovieForm] = useState(emptyForm);
+  const [formKey, setFormKey] = useState(0);
+  const createMovieMutation = useCreateMovieMutation();
 
-  async function handleAddMovie(event: React.FormEvent<HTMLFormElement>) {
+  function handleAddMovie(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMovieSubmitting(true);
-    setMovieError(null);
     setMovieSuccess(null);
+    const formData = new FormData();
+    formData.append("title", movieForm.title);
+    formData.append("year", movieForm.year);
+    formData.append("director", movieForm.director);
+    formData.append("rating", movieForm.rating);
+    formData.append("genre", movieForm.genre);
+    formData.append(
+      "cast",
+      JSON.stringify(
+        movieForm.cast
+          .split(",")
+          .map((name) => name.trim())
+          .filter(Boolean)
+      )
+    );
+    formData.append("synopsis", movieForm.synopsis);
+    formData.append("price", movieForm.price);
 
-    try {
-      const res = await authFetch(`${apiUrl}/api/add-movies`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: movieForm.title,
-          year: Number(movieForm.year),
-          director: movieForm.director,
-          rating: Number(movieForm.rating),
-          genre: movieForm.genre,
-          cast: movieForm.cast
-            .split(",")
-            .map((name) => name.trim())
-            .filter(Boolean),
-          synopsis: movieForm.synopsis,
-          posterUrl: movieForm.posterUrl,
-        }),
-      });
-
-      if (res.status === 403) {
-        throw new Error("Only admins can add movies");
-      }
-
-      if (!res.ok) {
-        throw new Error("Failed to add movie. Please try again.");
-      }
-
-      const created: Movie = await res.json();
-      setMovieForm(emptyForm);
-      setMovieSuccess(`"${created.title}" was added successfully.`);
-      toast.success(`"${created.title}" was added successfully`);
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to add movie. Please try again.";
-      setMovieError(message);
-      toast.error(message);
-    } finally {
-      setMovieSubmitting(false);
+    if (movieForm.poster) {
+      formData.append("poster", movieForm.poster);
     }
+
+    createMovieMutation.mutate(formData, {
+      onSuccess: (created) => {
+        setMovieForm(emptyForm);
+        setFormKey((key) => key + 1);
+        setMovieSuccess(`"${created.title}" was added successfully.`);
+        toast.success(`"${created.title}" was added successfully`);
+      },
+      onError: (error) => {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to add movie. Please try again.";
+        toast.error(message);
+      },
+    });
   }
 
   return (
@@ -84,10 +75,16 @@ export default function CreateMoviesPage() {
         </p>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleAddMovie} className="grid gap-4 sm:grid-cols-2">
-          {movieError ? (
+        <form
+          key={formKey}
+          onSubmit={handleAddMovie}
+          className="grid gap-4 sm:grid-cols-2"
+        >
+          {createMovieMutation.isError ? (
             <p className="text-sm text-destructive sm:col-span-2" role="alert">
-              {movieError}
+              {createMovieMutation.error instanceof Error
+                ? createMovieMutation.error.message
+                : "Failed to add movie. Please try again."}
             </p>
           ) : null}
 
@@ -163,6 +160,21 @@ export default function CreateMoviesPage() {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="price">Price</Label>
+            <Input
+              id="price"
+              type="number"
+              min="0"
+              step="0.01"
+              required
+              value={movieForm.price}
+              onChange={(e) =>
+                setMovieForm((f) => ({ ...f, price: e.target.value }))
+              }
+            />
+          </div>
+
+          <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="cast">Cast (comma separated)</Label>
             <Input
               id="cast"
@@ -176,15 +188,19 @@ export default function CreateMoviesPage() {
           </div>
 
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="posterUrl">Poster URL</Label>
+            <Label htmlFor="poster">Poster image</Label>
             <Input
-              id="posterUrl"
-              type="url"
+              id="poster"
+              type="file"
+              accept="image/*"
               required
-              value={movieForm.posterUrl}
-              onChange={(e) =>
-                setMovieForm((f) => ({ ...f, posterUrl: e.target.value }))
-              }
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                setMovieForm((prev) => ({
+                  ...prev,
+                  poster: file ?? null,
+                }));
+              }}
             />
           </div>
 
@@ -201,8 +217,8 @@ export default function CreateMoviesPage() {
           </div>
 
           <div className="sm:col-span-2">
-            <Button type="submit" disabled={movieSubmitting}>
-              {movieSubmitting ? "Saving..." : "Save movie"}
+            <Button type="submit" disabled={createMovieMutation.isPending}>
+              {createMovieMutation.isPending ? "Saving..." : "Save movie"}
             </Button>
           </div>
         </form>

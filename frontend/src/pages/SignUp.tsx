@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,10 +12,11 @@ import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { FormInput } from "@/components/form/form-input";
 import { signupSchema, type SignupFormData } from "@/lib/schemas/signup-schema";
+import { useSignupMutation } from "@/hooks/queries/mutations/use-signup-mutation";
 
 export default function SignUp() {
-  const apiUrl = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
+  const signupMutation = useSignupMutation();
 
   const { control, handleSubmit } = useForm<SignupFormData>({
     resolver: yupResolver(signupSchema),
@@ -27,39 +27,21 @@ export default function SignUp() {
     },
   });
 
-  const signupMutation = useMutation({
-    mutationFn: async (values: SignupFormData) => {
-      const res = await fetch(`${apiUrl}/api/auth/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(values),
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        throw new Error(
-          data?.message ?? "Could not create account. Please try again."
-        );
-      }
-
-      return data;
-    },
-    onSuccess: () => {
-      toast.success("Account created successfully");
-      navigate("/login");
-    },
-    onError: (error) => {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Could not create account. Please try again.";
-      toast.error(message);
-    },
-  });
+  function onSubmit(data: SignupFormData) {
+    signupMutation.mutate(data, {
+      onSuccess: () => {
+        toast.success("Account created successfully");
+        navigate("/login");
+      },
+      onError: (error) => {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Could not create account. Please try again.";
+        toast.error(message);
+      },
+    });
+  }
 
   return (
     <Card className="w-full max-w-md">
@@ -71,10 +53,7 @@ export default function SignUp() {
       </CardHeader>
 
       <CardContent>
-        <form
-          onSubmit={handleSubmit((data) => signupMutation.mutate(data))}
-          className="space-y-4"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <FormInput
             control={control}
             name="name"

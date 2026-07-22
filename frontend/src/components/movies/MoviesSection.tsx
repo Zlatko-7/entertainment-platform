@@ -1,15 +1,15 @@
-import { authFetch } from "@/auth/api";
 import { MoviesPagination } from "@/components/movies/MoviesPagination";
 import CheckoutWrapper from "@/components/stripe/CheckoutWrapper";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { useMoviesQuery } from "@/hooks/queries/use-movies-query";
+import { usePurchasedItemsQuery } from "@/hooks/queries/use-purchased-items-query";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { formatPrice } from "@/lib/dashboard";
 import type { FilterOption, Movie } from "@/types/dashboard";
 import { Info, ShoppingBag, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-
-const apiUrl = import.meta.env.VITE_API_URL;
 
 interface MoviesSectionProps {
   searchQuery: string;
@@ -17,104 +17,55 @@ interface MoviesSectionProps {
   onSelectMovie: (movie: Movie) => void;
 }
 
+const MOVIES_PER_PAGE = 12;
+
 export function MoviesSection({
   searchQuery,
   activeFilter,
   onSelectMovie,
 }: MoviesSectionProps) {
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [moviesLoading, setMoviesLoading] = useState(false);
-
   const [showCheckout, setShowCheckout] = useState(false);
   const [checkoutMovie, setCheckoutMovie] = useState<Movie | null>(null);
-  const [purchasedItems, setPurchasedItems] = useState<string[]>([]);
-
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
-  const limit = 12;
+  const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
-  async function fetchMovies(
-    nextPage: number,
-    search: string,
-    filter: FilterOption
-  ) {
-    setMoviesLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: String(nextPage),
-        limit: String(limit),
-      });
+  const {
+    data: moviesData,
+    isPending: moviesLoading,
+    isError: moviesError,
+    error: moviesQueryError,
+  } = useMoviesQuery({
+    page,
+    limit: MOVIES_PER_PAGE,
+    search: debouncedSearch,
+    filter: activeFilter,
+  });
 
-      if (search.trim()) {
-        params.set("search", search.trim());
-      }
+  const { data: purchasedItems = [], isError: purchasedItemsError } =
+    usePurchasedItemsQuery();
 
-      if (filter !== "all") {
-        params.set("filter", filter);
-      }
-
-      const res = await authFetch(
-        `${apiUrl}/api/get-movies?${params.toString()}`,
-        { method: "GET" }
-      );
-
-      if (!res.ok) throw new Error("Failed to load movies");
-
-      const data: {
-        data: Movie[];
-        pagination: { totalPages: number };
-      } = await res.json();
-
-      setMovies(data?.data ?? []);
-      setTotalPages(data.pagination?.totalPages ?? 1);
-    } catch {
-      setMovies([]);
-      setTotalPages(1);
-      toast.error("Failed to load movies. Please try again.");
-    } finally {
-      setMoviesLoading(false);
-    }
-  }
-
-  async function fetchPurchasedMovies() {
-    try {
-      const res = await authFetch(`${apiUrl}/api/purchased-items`, {
-        method: "GET",
-      });
-      if (!res.ok) throw new Error("Failed to load purchased items");
-      const data = await res.json();
-      setPurchasedItems(
-        Array.isArray(data.purchasedProducts) ? data.purchasedProducts : []
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to load your purchases. Please try again.";
-      toast.error(message);
-    }
-  }
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 300);
-
-    return () => window.clearTimeout(timer);
-  }, [searchQuery]);
+  const movies = moviesData?.data ?? [];
+  const totalPages = moviesData?.pagination?.totalPages ?? 1;
 
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, activeFilter]);
 
   useEffect(() => {
-    fetchMovies(page, debouncedSearch, activeFilter);
-  }, [page, debouncedSearch, activeFilter]);
+    if (!moviesError || !moviesQueryError) return;
+
+    toast.error(
+      moviesQueryError instanceof Error
+        ? moviesQueryError.message
+        : "Failed to load movies. Please try again."
+    );
+  }, [moviesError, moviesQueryError]);
 
   useEffect(() => {
-    fetchPurchasedMovies();
-  }, []);
+    if (!purchasedItemsError) return;
+
+    toast.error("Failed to load your purchases. Please try again.");
+  }, [purchasedItemsError]);
 
   return (
     <>

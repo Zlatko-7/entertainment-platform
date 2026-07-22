@@ -6,20 +6,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { useUser } from "@/auth/useAuth";
 import { RouteUrls } from "@/routes/urls";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema, type LoginFormData } from "@/lib/schemas/login-schema";
 import { FormInput } from "@/components/form/form-input";
+import { useLoginMutation } from "@/hooks/queries/mutations/use-login-mutation";
 
 export default function Login() {
-  const apiUrl = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
-  const { getUser } = useUser();
+  const loginMutation = useLoginMutation();
 
   const { control, handleSubmit } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
@@ -29,43 +27,20 @@ export default function Login() {
     },
   });
 
-  const [loading, setLoading] = useState(false);
-
-  async function onSubmit(data: LoginFormData) {
-    setLoading(true);
-
-    try {
-      const res = await fetch(`${apiUrl}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        throw new Error(errorData?.message ?? "Invalid email or password");
-      }
-
-      await res.json();
-
-      await getUser();
-      navigate(RouteUrls.movie);
-      toast.success("Logged in successfully");
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Could not log in. Please try again.";
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
+  function onSubmit(data: LoginFormData) {
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        navigate(RouteUrls.movie);
+        toast.success("Logged in successfully");
+      },
+      onError: (error) => {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Could not log in. Please try again.";
+        toast.error(message);
+      },
+    });
   }
 
   return (
@@ -95,8 +70,13 @@ export default function Login() {
             placeholder="Enter your password"
           />
 
-          <Button type="submit" className="w-full" size="lg" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+          <Button
+            type="submit"
+            className="w-full"
+            size="lg"
+            disabled={loginMutation.isPending}
+          >
+            {loginMutation.isPending ? "Logging in..." : "Login"}
           </Button>
         </form>
         <div className="mt-4 text-center text-sm text-muted-foreground">

@@ -1,9 +1,6 @@
-import { authFetch } from "@/auth/api";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useCreatePaymentMutation } from "@/hooks/queries/mutations/use-create-payment-mutation";
 import { toast } from "react-toastify";
-
-const apiUrl = import.meta.env.VITE_API_URL;
 
 interface CheckoutFormProps {
   // CHECKOUT SESSION FLOW: backend resolves the movie to its Stripe product.
@@ -15,52 +12,27 @@ export default function CheckoutForm({
   movieId,
   productId,
 }: CheckoutFormProps) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const paymentMutation = useCreatePaymentMutation();
 
-  async function handlePay() {
+  function handlePay() {
     if (!movieId && !productId) {
       const message = "No movie or product selected.";
-      setError(message);
       toast.error(message);
       return;
     }
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await authFetch(`${apiUrl}/api/stripe/create-payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(movieId ? { movieId } : { productId }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message ?? data.error ?? "Payment setup failed");
+    paymentMutation.mutate(
+      movieId ? { movieId } : { productId },
+      {
+        onError: (error) => {
+          const message =
+            error instanceof Error
+              ? error.message
+              : "Payment failed. Please try again.";
+          toast.error(message);
+        },
       }
-
-      const { url } = data;
-
-      if (typeof url !== "string" || !url) {
-        throw new Error("Checkout URL was not returned by the server.");
-      }
-
-      // CHECKOUT SESSION FLOW: Stripe hosts the payment form, so redirect
-      // to the session URL instead of confirming a PaymentIntent in React.
-      window.location.assign(url);
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Payment failed. Please try again.";
-      setError(message);
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
+    );
   }
 
   return (
@@ -72,19 +44,23 @@ export default function CheckoutForm({
         </p>
       </div>
 
-      {error ? (
+      {paymentMutation.isError ? (
         <p className="text-sm text-destructive" role="alert">
-          {error}
+          {paymentMutation.error instanceof Error
+            ? paymentMutation.error.message
+            : "Payment failed. Please try again."}
         </p>
       ) : null}
 
       <Button
         type="button"
         className="w-full"
-        disabled={loading}
+        disabled={paymentMutation.isPending}
         onClick={handlePay}
       >
-        {loading ? "Opening checkout..." : "Continue to secure checkout"}
+        {paymentMutation.isPending
+          ? "Opening checkout..."
+          : "Continue to secure checkout"}
       </Button>
     </div>
   );
