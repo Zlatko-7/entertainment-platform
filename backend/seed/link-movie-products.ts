@@ -1,51 +1,12 @@
 // CURSOS LAST CHANGE: seed script — creates Stripe product/price per movie and sets movies.product_id
 import "dotenv/config";
-import { eq, isNull } from "drizzle-orm";
+import { isNull } from "drizzle-orm";
 import { db } from "../src/db/index.js";
-import { movies, products } from "../src/db/schema.js";
-import { stripe } from "../src/lib/stripe.js";
+import { movies } from "../src/db/schema.js";
+import { linkMovieToProduct } from "../src/services/link-movie-to-product-service.js";
 
 const limitArg = process.argv.find((arg) => arg.startsWith("--limit="));
 const limit = limitArg ? Number(limitArg.split("=")[1]) : undefined;
-
-async function linkMovieToProduct(movie: (typeof movies.$inferSelect)) {
-  const amountCents = Math.max(50, Math.round(movie.price * 100));
-
-  const stripeProduct = await stripe.products.create({
-    name: movie.title,
-    description: `${movie.title} (${movie.year}) — digital movie purchase`,
-    metadata: {
-      movieId: movie.id,
-    },
-  });
-
-  const stripePrice = await stripe.prices.create({
-    product: stripeProduct.id,
-    unit_amount: amountCents,
-    currency: "eur",
-  });
-
-  const [product] = await db
-    .insert(products)
-    .values({
-      name: movie.title,
-      description: movie.synopsis.slice(0, 500),
-      stripeProductId: stripeProduct.id,
-      stripePriceId: stripePrice.id,
-      price: amountCents,
-      currency: "eur",
-      interval: "one_time",
-      active: true,
-    })
-    .returning();
-
-  await db
-    .update(movies)
-    .set({ productId: product.id })
-    .where(eq(movies.id, movie.id));
-
-  return product;
-}
 
 async function main() {
   if (!process.env.STRIPE_SECRET_KEY) {

@@ -6,3 +6,5 @@ dist/
 backup.sql
 *.log
 .DS_Store
+uploads/posters/*
+!uploads/posters/.gitkeep
