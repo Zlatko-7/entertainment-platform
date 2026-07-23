@@ -19,6 +19,9 @@ const app = express();
 const FRONTEND_URL = process.env.FRONTEND_URL;
 const PORT = process.env.PORT ?? 3000;
 
+// Required on Vercel so express-rate-limit accepts X-Forwarded-For.
+app.set("trust proxy", 1);
+
 app.use(helmet());
 app.use(generalRateLimiter);
 app.use(

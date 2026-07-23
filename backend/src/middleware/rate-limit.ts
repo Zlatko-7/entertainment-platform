@@ -5,6 +5,7 @@ export const generalRateLimiter = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { message: "Too many requests, please try again later" },
 });
 
@@ -13,5 +14,6 @@ export const authRateLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { message: "Too many authentication attempts, please try again later" },
 });
