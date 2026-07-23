@@ -1,12 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/app-error.js";
+import { authCookieOptions } from "../lib/cookie-options.js";
 import { logoutService } from "../services/logout-service.js";
-
-const cookieOptions = {
-  httpOnly: true,
-  secure: false, // Set to true in production
-  sameSite: "lax" as const,
-};
 
 export async function logoutController(
   req: Request,
@@ -22,8 +17,8 @@ export async function logoutController(
 
     await logoutService({ userId });
 
-    res.clearCookie("accessToken", cookieOptions);
-    res.clearCookie("refreshToken", cookieOptions);
+    res.clearCookie("accessToken", authCookieOptions);
+    res.clearCookie("refreshToken", authCookieOptions);
 
     return res.status(200).json({ message: "User logged out successfully" });
   } catch (error) {

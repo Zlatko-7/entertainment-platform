@@ -1,13 +1,8 @@
 import { NextFunction, Request, Response } from "express";
+import { authCookieOptions } from "../lib/cookie-options.js";
 import { refreshTokenService } from "../services/refresh-token-service.js";
 
 const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000;
-
-const cookieOptions = {
-  httpOnly: true,
-  secure: false,
-  sameSite: "lax" as const,
-};
 
 export async function refreshTokenController(
   req: Request,
@@ -19,7 +14,7 @@ export async function refreshTokenController(
     const { accessToken } = await refreshTokenService({ refreshToken });
 
     res.cookie("accessToken", accessToken, {
-      ...cookieOptions,
+      ...authCookieOptions,
       maxAge: ACCESS_TOKEN_MAX_AGE,
     });
 
