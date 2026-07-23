@@ -49,6 +49,10 @@ app.use("/api/order-history", orderHistoryRoutes);
 app.use("/api/purchased-items", purchasedItemsRoutes);
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
-  console.log(`Server running on ${PORT}`);
-});
+export default app;
+
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on ${PORT}`);
+  });
+}
