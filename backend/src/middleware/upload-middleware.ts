@@ -3,13 +3,23 @@ import path from "path";
 import multer from "multer";
 import { AppError } from "../errors/app-error.js";
 
-const postersDir = path.resolve("uploads/posters");
+// Vercel’s function filesystem is read-only except /tmp.
+const postersDir = process.env.VERCEL
+  ? path.join("/tmp", "uploads", "posters")
+  : path.resolve("uploads/posters");
 
-fs.mkdirSync(postersDir, { recursive: true });
+function ensurePostersDir() {
+  fs.mkdirSync(postersDir, { recursive: true });
+}
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, postersDir);
+    try {
+      ensurePostersDir();
+      cb(null, postersDir);
+    } catch (error) {
+      cb(error as Error, postersDir);
+    }
   },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase() || ".jpg";
