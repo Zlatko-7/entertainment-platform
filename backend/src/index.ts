@@ -41,6 +41,13 @@ app.use(
   },
   express.static(path.resolve("uploads")),
 );
+app.get("/", (_req, res) => {
+  res.json({
+    message: "Entertainment Platform API",
+    health: "/api/health",
+  });
+});
+
 app.get("/api/health", (_, res) => {
   res.json({ status: "ok" });
 });
