@@ -3,11 +3,10 @@ import { Request, Response, NextFunction } from "express";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-// CURSOR: /me AND /logout READ ONLY accessToken (15m) — refreshToken IS NEVER USED HERE
 export async function isAuthenticated(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   try {
     const accessToken = req.cookies.accessToken;
