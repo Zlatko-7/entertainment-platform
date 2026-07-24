@@ -1,7 +1,7 @@
 import { RouteUrls } from "@/routes/urls";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { Clapperboard, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Clapperboard, ShoppingBag } from "lucide-react";
 
 export default function CheckoutCancelPage() {
   return (
