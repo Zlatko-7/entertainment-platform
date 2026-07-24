@@ -8,4 +8,6 @@ export const RouteUrls = {
   adminSubscriptions: "/admin/subscriptions",
   login: "/login",
   signup: "/signup",
+  checkoutSuccess: "/success",
+  checkoutCancel: "/cancel",
 } as const;

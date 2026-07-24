@@ -1,8 +1,10 @@
 import AdminLayout from "@/components/layout/AdminLayout";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import CheckoutCancelPage from "@/pages/admin/CheckoutCancelPage";
 import CreateMoviesPage from "@/pages/admin/CreateMoviesPage";
 import OrdersHistoryPage from "@/pages/admin/OrdersHistoryPage";
 import SubscriptionsPage from "@/pages/admin/SubscriptionsPage";
+import CheckoutSuccessPage from "@/pages/CheckoutSuccessPage";
 import LibraryPage from "@/pages/LibraryPage";
 import MoviesPage from "@/pages/MoviesPage";
 import MusicPage from "@/pages/MusicPage";
@@ -17,6 +19,10 @@ export function PrivateRoutes() {
         <Route path={RouteUrls.movie} element={<MoviesPage />} />
         <Route path={RouteUrls.music} element={<MusicPage />} />
         <Route path={RouteUrls.library} element={<LibraryPage />} />
+        <Route
+          path={RouteUrls.checkoutCancel}
+          element={<CheckoutCancelPage />}
+        />
 
         <Route path={RouteUrls.admin} element={<AdminLayout />}>
           <Route
@@ -33,6 +39,10 @@ export function PrivateRoutes() {
       </Route>
 
       <Route path="/" element={<Navigate to={RouteUrls.movie} replace />} />
+      <Route
+        path={RouteUrls.checkoutSuccess}
+        element={<CheckoutSuccessPage />}
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

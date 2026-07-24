@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CheckoutForm from "./CheckoutForm";
 
 interface CheckoutWrapperProps {
-  // CURSOS LAST CHANGE: pass movieId from MoviesSection Buy modal
   movieId?: string;
   productId?: string;
   title?: string;
